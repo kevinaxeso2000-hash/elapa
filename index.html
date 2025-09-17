@@ -1,0 +1,1866 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://i.ibb.co/6PqJqN4/gestor-prestamos-icon.png">
+    <title>Gestor de Préstamos</title>
+    <style>
+        /* CSS reescrito para un estilo moderno con modo oscuro */
+        :root {
+            --bg-color: #121212; /* Fondo principal oscuro */
+            --card-bg: #1e1e1e; /* Fondo de tarjetas y componentes */
+            --primary: #4CAF50; /* Verde vibrante */
+            --primary-light: #81C784;
+            --secondary: #333333; /* Gris oscuro para el fondo de botones y tabs */
+            --text-color: #E0E0E0; /* Texto claro */
+            --muted-text: #BDBDBD; /* Texto secundario más claro */
+            --border-color: #333333; /* Bordes sutiles */
+            --destructive: #F44336; /* Rojo */
+            --success: #4CAF50; /* Verde */
+            --accent-color: #616161; /* Gris de acento para hover, etc. */
+            --shadow-color: rgba(0, 0, 0, 0.4); /* Sombra más oscura */
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            padding: 20px 0;
+            box-sizing: border-box;
+        }
+
+        .app {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            margin: 0 16px;
+            box-shadow: 0 4px 12px var(--shadow-color);
+            overflow: hidden;
+        }
+        
+        h1, h2, h3 {
+            color: var(--text-color);
+            margin: 0;
+            font-weight: 600;
+        }
+        h1 { font-size: 28px; padding: 20px; }
+        h2 { font-size: 22px; margin-bottom: 16px; }
+        h3 { font-size: 18px; margin-bottom: 12px; }
+
+        .tabs {
+            display: flex;
+            justify-content: space-around;
+            margin: 10px 16px;
+            padding: 4px;
+            background-color: var(--secondary);
+            border-radius: 9px;
+            overflow: hidden;
+        }
+
+        .tab-btn {
+            flex-grow: 1;
+            padding: 8px 12px;
+            border: none;
+            background-color: transparent;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--muted-text);
+            transition: all 0.2s ease-in-out;
+            border-radius: 7px;
+        }
+
+        .tab-btn.active {
+            background-color: var(--primary);
+            color: #fff;
+            box-shadow: 0 2px 5px var(--shadow-color);
+        }
+        .tab-btn:hover {
+            color: var(--primary-light);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 20px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-container {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: 500;
+            color: var(--muted-text);
+            margin-bottom: -8px;
+            font-size: 15px;
+        }
+
+        input[type="text"], input[type="number"], input[type="tel"], input[type="url"], input[type="date"], select {
+            width: 100%;
+            padding: 12px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+            background-color: var(--secondary);
+            color: var(--text-color);
+            transition: border-color 0.2s ease-in-out;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            text-align: center;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .btn-primary:hover { background-color: #388E3C; }
+
+        .btn-danger {
+            background-color: var(--destructive);
+            color: white;
+        }
+        .btn-danger:hover { background-color: #D32F2F; }
+
+        .btn-export {
+            background-color: var(--primary);
+            color: white;
+        }
+        .btn-import {
+            background-color: var(--primary-light);
+            color: white;
+        }
+
+        .btn.ghost {
+            background-color: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            padding: 10px 18px;
+            border-radius: 8px;
+        }
+        
+        .btn-sm {
+            padding: 8px 12px;
+            font-size: 14px;
+        }
+
+        .dashboard-section {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        
+        /* Nuevo diseño de dashboard */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .stats-card {
+            background-color: var(--secondary);
+            padding: 16px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: inset 0 0 0 0.5px var(--border-color);
+        }
+        .stats-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .stats-label {
+            font-size: 13px;
+            color: var(--muted-text);
+            margin-top: 4px;
+        }
+
+        .loan-list {
+            display: grid;
+            gap: 16px;
+        }
+        .loan-card {
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background-color: var(--secondary);
+            transition: all 0.2s ease;
+        }
+        .loan-card:hover {
+            box-shadow: 0 4px 10px var(--shadow-color);
+            transform: translateY(-2px);
+        }
+        .loan-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed var(--border-color);
+        }
+        .loan-name {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .loan-amount {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary-light);
+        }
+        .loan-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: var(--muted-text);
+            margin-bottom: 12px;
+        }
+        .loan-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: auto;
+        }
+        .loan-actions .btn {
+            flex-grow: 1;
+        }
+        
+        .today-collections-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .collection-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background-color: var(--secondary);
+            border-radius: 8px;
+        }
+        .collection-item-name { font-weight: 500; }
+        .collection-item-amount { color: var(--primary); font-weight: 600; }
+        
+        .select-route-wrap {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        #routeSelect { flex-grow: 1; }
+
+        .route-summary {
+            background-color: var(--secondary);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: inset 0 0 0 0.5px var(--border-color);
+        }
+
+        .route-title {
+            font-weight: 600;
+            font-size: 18px;
+            color: var(--text-color);
+        }
+
+        .route-total {
+            font-size: 14px;
+            color: var(--muted-text);
+            margin-top: 5px;
+        }
+
+        .table-container { overflow-x: auto; }
+        #loansTable {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 14px;
+            background-color: var(--secondary);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        #loansTable thead { display: none; }
+        #loansTable tr { border-bottom: 1px solid var(--border-color); }
+        #loansTable tr:last-child { border-bottom: none; }
+        #loansTable th, #loansTable td {
+            padding: 12px 15px;
+            text-align: left;
+            color: var(--text-color);
+        }
+
+        .actions .btn {
+            margin: 2px;
+            padding: 8px 12px;
+            font-size: 14px;
+            border-radius: 8px;
+        }
+        .btn-cuota {
+            padding: 6px 10px;
+            margin: 2px;
+            font-size: 12px;
+            border: none;
+            border-radius: 6px;
+            color: white;
+        }
+        .btn-recibo {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .muted-small {
+            font-size: 12px;
+            color: var(--muted-text);
+        }
+        .small { font-size: 14px; }
+        .success { color: var(--success); font-weight: 600; }
+        .error { color: var(--destructive); font-weight: 600; }
+
+        .routes-list {
+            display: grid;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .route {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background-color: var(--secondary);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .route:hover {
+            box-shadow: 0 4px 10px var(--shadow-color);
+            transform: translateY(-2px);
+        }
+        .route .meta { flex-grow: 1; }
+        .route .actions { display: flex; gap: 8px; }
+        .route img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary-light);
+        }
+
+        .storage-actions {
+            margin-top: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .storage-actions .btn { flex: 1; }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.6);
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        .modal-content, .modal-content-recibo {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px var(--shadow-color);
+            position: relative;
+            width: 90%;
+            max-width: 600px;
+            animation: modal-open 0.3s cubic-bezier(0.2, 0, 0, 1.0);
+        }
+        #modalPlan .modal-content { max-width: 95%; }
+        .modal-content-recibo { max-width: 350px; }
+
+        @keyframes modal-open {
+            from {opacity: 0; transform: scale(0.95) translateY(10px);}
+            to {opacity: 1; transform: scale(1) translateY(0);}
+        }
+
+        .close-btn {
+            color: var(--muted-text);
+            font-size: 32px;
+            font-weight: bold;
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            z-index: 1001;
+            transition: color 0.2s;
+        }
+        .close-btn:hover, .close-btn:focus {
+            color: var(--text-color);
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Estilos de Recibo (Gris y Negro) */
+        .recibo-preview {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            text-align: center;
+            padding: 10px;
+            background-color: var(--secondary);
+            border-radius: 12px;
+            border: 1px dashed var(--border-color);
+            line-height: 1.4;
+            color: var(--text-color);
+            font-family: monospace;
+            box-shadow: 0 2px 8px var(--shadow-color);
+        }
+        .recibo-preview strong { color: var(--text-color); }
+        .recibo-header {
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+        .recibo-header img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 8px;
+            border: 2px solid var(--primary-light);
+        }
+        .recibo-details {
+            text-align: left;
+            font-size: 14px;
+        }
+        .recibo-details div { margin-bottom: 8px; }
+        .linea-firma {
+            border-top: 1px dashed var(--border-color);
+            padding-top: 15px;
+            margin-top: 20px;
+        }
+        .linea-firma div { font-size: 12px; color: var(--muted-text); }
+        .recibo-footer { margin-top: 15px; font-size: 12px; color: var(--muted-text); }
+        .atrasos-rojo { color: var(--destructive); font-weight: bold; }
+        .recibo-total {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--primary);
+            text-align: right;
+            margin-top: 10px;
+        }
+        .recibo-charges {
+            text-align: right;
+            font-size: 12px;
+            color: var(--destructive);
+        }
+
+        /* Fix para la tabla dentro del modal */
+        #planTableWrap {
+            overflow-x: auto; /* Permite el desplazamiento horizontal */
+            -webkit-overflow-scrolling: touch; /* Mejora el scroll en iOS */
+        }
+        #planTableWrap table {
+            width: max-content; /* El ancho se ajusta al contenido */
+            min-width: 100%; /* Asegura que la tabla no sea más pequeña que su contenedor */
+            border-collapse: collapse;
+        }
+        #planTableWrap table td {
+            white-space: nowrap; /* Evita que el texto de las celdas se envuelva */
+        }
+        #planTableWrap table td:first-child {
+            padding-left: 0;
+        }
+        #planTableWrap table th:first-child {
+            padding-left: 0;
+        }
+        
+        @media (max-width: 768px) {
+            .app { border-radius: 0; margin: 0; }
+            .container { padding: 0; }
+            body { align-items: stretch; }
+            .tab-content { padding: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="app">
+        <h1>Gestor de Préstamos</h1>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('dashboard')">Panel</button>
+            <button class="tab-btn" onclick="showTab('addLoan')">Agregar Préstamo</button>
+            <button class="tab-btn" onclick="showTab('routes')">Rutas</button>
+            <button class="tab-btn" onclick="showTab('settings')">Ajustes</button>
+        </div>
+
+        <div id="dashboard" class="tab-content active">
+            <div class="dashboard-section">
+                <h3>Cobros Pendientes para Hoy</h3>
+                <div id="todayCollections" class="today-collections-list">
+                    </div>
+            </div>
+
+            <div class="stats-row">
+                <div class="stats-card">
+                    <div class="stats-value" id="totalLoans">0</div>
+                    <div class="stats-label">Préstamos</div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-value" id="totalGeneral">$0</div>
+                    <div class="stats-label">Capital Total</div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-value" id="totalOnTheStreet">$0</div>
+                    <div class="stats-label">Saldo en calle</div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-value" id="totalCollected">$0</div>
+                    <div class="stats-label">Recaudo Semanal</div>
+                </div>
+            </div>
+
+            <div class="dashboard-section">
+                <h3>Resumen de Préstamos</h3>
+                <div class="select-route-wrap">
+                    <select id="routeSelect"></select>
+                    <button class="btn btn-sm" onclick="refreshDashboard()">Refrescar</button>
+                </div>
+                <div class="route-summary" id="routeSummary">
+                    <div id="selRouteName" class="route-title"></div>
+                    <div id="selRouteSum" class="route-total"></div>
+                </div>
+                <div id="loansList" class="loan-list">
+                    </div>
+            </div>
+
+            <div class="dashboard-section">
+                <h3>Recaudo Semanal</h3>
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button class="btn btn-primary btn-sm" onclick="addExtraCollection()">Agregar Dinero Extra</button>
+                    <button class="btn btn-danger btn-sm" onclick="resetWeeklyCollections()">Reiniciar Recaudo</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="addLoan" class="tab-content">
+            <h2>Agregar Nuevo Préstamo</h2>
+            <div class="form-container">
+                <label for="cliente">Nombre del cliente</label>
+                <input type="text" id="cliente" placeholder="Nombre completo" required>
+                <label for="cedula">Cédula</label>
+                <input type="text" id="cedula" placeholder="Opcional">
+                <label for="telefono">Teléfono</label>
+                <input type="tel" id="telefono" placeholder="Opcional">
+                <label for="direccion">Dirección</label>
+                <input type="text" id="direccion" placeholder="Opcional">
+                <label for="monto">Monto del Préstamo ($)</label>
+                <input type="text" id="monto" placeholder="Ej: 50.000" required>
+                <label for="interes">Interés (%)</label>
+                <input type="number" id="interes" value="20" min="0" required>
+                <label for="cuotas">Número de cuotas</label>
+                <input type="number" id="cuotas" value="30" min="1" required>
+                <label for="frecuencia">Frecuencia</label>
+                <select id="frecuencia">
+                    <option value="DIARIO">Diario</option>
+                    <option value="SEMANAL">Semanal</option>
+                    <option value="QUINCENAL">Quincenal</option>
+                    <option value="MENSUAL">Mensual</option>
+                </select>
+                <label for="startDateInput">Fecha de inicio</label>
+                <input type="date" id="startDateInput" required>
+                <label for="firstPaymentDateInput">Fecha del primer pago</label>
+                <input type="date" id="firstPaymentDateInput" required>
+            </div>
+            <button class="btn btn-primary" id="btnAddLoan">Agregar Préstamo</button>
+        </div>
+
+        <div id="routes" class="tab-content">
+            <h2>Gestión de Rutas</h2>
+            <div class="form-container">
+                <h3>Agregar Nueva Ruta</h3>
+                <label for="routeName">Nombre de la ruta</label>
+                <input type="text" id="routeName" placeholder="Ej: Zona Norte" required>
+                <label for="routeLogoFile">Logo (subir archivo)</label>
+                <input type="file" id="routeLogoFile" accept="image/*">
+                <label for="routeLogoURL">Logo (URL de imagen)</label>
+                <input type="url" id="routeLogoURL" placeholder="http://ejemplo.com/logo.png">
+                <button class="btn btn-primary" id="btnAddRoute">Guardar Ruta</button>
+            </div>
+            <h3>Rutas Existentes</h3>
+            <div id="routesList" class="routes-list">
+            </div>
+        </div>
+
+        <div id="settings" class="tab-content">
+            <h2>Ajustes y Mantenimiento</h2>
+            <div class="storage-actions">
+                <h3>Copia de Seguridad</h3>
+                <button class="btn btn-export btn-sm" id="btnExport">Exportar Datos (JSON)</button>
+                <button class="btn btn-import btn-sm" id="btnImport">Importar Datos</button>
+                <input type="file" id="importFile" style="display: none;">
+                <button class="btn btn-danger btn-sm" onclick="arreglarDatosCorruptos()">Arreglar Datos</button>
+                <button class="btn btn-danger btn-sm" id="btnResetRoutes">Borrar Todo</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modalPlan" class="modal" onclick="closeModal('modalPlan')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <span class="close-btn" onclick="closeModal('modalPlan')">&times;</span>
+        <h2 id="planMeta"></h2>
+        <div id="planSummary"></div>
+        <div id="planTableWrap"></div>
+        <button class="btn btn-primary" style="margin-top: 20px;" onclick="closeModal('modalPlan')">Cerrar</button>
+    </div>
+</div>
+
+<div id="modalRecibo" class="modal" onclick="closeModal('modalRecibo')">
+    <div class="modal-content-recibo" onclick="event.stopPropagation()">
+        <span class="close-btn" onclick="closeModal('modalRecibo')">&times;</span>
+        <div id="reciboBody"></div>
+    </div>
+</div>
+
+<script>
+    const LS_ROUTES = 'prest_routes_v1';
+    const LS_LOANS = 'prest_loans_v1';
+    const LS_WEEKLY_STATS = 'prest_weekly_stats_v2';
+    const MAX_ROUTES = 10;
+    const LATE_FEE_AMOUNT = 10000;
+    let currentRouteId = null;
+
+    const $ = id => document.getElementById(id);
+    const q = sel => document.querySelector(sel);
+
+    const formatCOP = n => {
+        if (n == null || isNaN(n)) return '0';
+        return Number(n).toLocaleString('es-CO', { maximumFractionDigits: 0 });
+    };
+
+    const uid = (p = '') => p + Math.random().toString(36).slice(2, 9).toUpperCase();
+
+    function loadRoutes() { return JSON.parse(localStorage.getItem(LS_ROUTES) || '[]'); }
+    function saveRoutes(r) { localStorage.setItem(LS_ROUTES, JSON.stringify(r)); }
+    function loadLoans() { return JSON.parse(localStorage.getItem(LS_LOANS) || '[]'); }
+    function saveLoans(l) { localStorage.setItem(LS_LOANS, JSON.stringify(l)); }
+    function loadWeeklyStats() { return JSON.parse(localStorage.getItem(LS_WEEKLY_STATS) || '{}'); }
+    function saveWeeklyStats(s) { localStorage.setItem(LS_WEEKLY_STATS, JSON.stringify(s)); }
+
+    function autoSave() {
+        console.log('Guardando automáticamente...');
+    }
+    
+    setInterval(autoSave, 30000); 
+
+    function init() {
+        checkWeeklyReset();
+        renderRoutesList();
+        populateRouteSelect();
+        renderLoansList(currentRouteId);
+        updateTotals(currentRouteId);
+        renderTodayCollections();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        init();
+        const montoInput = $('monto');
+        montoInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value) {
+                value = parseInt(value, 10).toLocaleString('es-CO');
+            }
+            e.target.value = value;
+        });
+    });
+
+    $('btnAddRoute').addEventListener('click', async () => {
+        const name = $('routeName').value.trim();
+        const fileInput = $('routeLogoFile');
+        const url = $('routeLogoURL').value.trim();
+        let routes = loadRoutes();
+        if (routes.length >= MAX_ROUTES) { alert('Máximo de rutas alcanzado.'); return; }
+        if (!name) { alert('Escribe un nombre para la ruta.'); return; }
+        let logoData = '';
+        if (fileInput.files && fileInput.files[0]) {
+            logoData = await fileToDataURL(fileInput.files[0]);
+        } else if (url) {
+            logoData = url;
+        } else {
+            logoData = '';
+        }
+        routes.push({ id: uid('R-'), name, logo: logoData });
+        saveRoutes(routes);
+        $('routeName').value = ''; $('routeLogoFile').value = ''; $('routeLogoURL').value = '';
+        init();
+    });
+
+    $('btnResetRoutes').addEventListener('click', () => {
+        if (!confirm('Borrar todas las rutas y préstamos?')) return;
+        localStorage.removeItem(LS_ROUTES); localStorage.removeItem(LS_LOANS);
+        localStorage.removeItem(LS_WEEKLY_STATS);
+        init();
+        renderTodayCollections();
+    });
+
+    function fileToDataURL(file) {
+        return new Promise((res, rej) => {
+            const r = new FileReader();
+            r.onload = e => res(e.target.result);
+            r.onerror = e => rej(e);
+            r.readAsDataURL(file);
+        });
+    }
+
+    function renderRoutesList() {
+        const wrap = $('routesList'); wrap.innerHTML = '';
+        const routes = loadRoutes();
+        routes.forEach(rt => {
+            const div = document.createElement('div');
+            div.className = 'route';
+            div.addEventListener('click', () => {
+                showRouteDashboard(rt.id);
+            });
+            const img = document.createElement('img'); img.src = rt.logo || placeholderLogo(rt.name);
+            const meta = document.createElement('div'); meta.className = 'meta';
+            meta.innerHTML = `<div style="font-weight:700">${rt.name}</div><div class="small muted-small">ID: ${rt.id}</div>`;
+            const actions = document.createElement('div');
+            actions.innerHTML = `<button class="btn ghost btn-sm" onclick="event.stopPropagation(); editRoute('${rt.id}')">Editar</button>
+                                <button class="btn btn-sm" style="background:var(--destructive)" onclick="event.stopPropagation(); deleteRoute('${rt.id}')">Eliminar</button>`;
+            div.appendChild(img); div.appendChild(meta); div.appendChild(actions);
+            wrap.appendChild(div);
+        });
+    }
+
+    function showRouteDashboard(routeId) {
+        const selectElement = $('routeSelect');
+        selectElement.value = routeId;
+        const event = new Event('change');
+        selectElement.dispatchEvent(event);
+        showTab('dashboard');
+    }
+
+    function placeholderLogo(name) {
+        const initial = (name || 'R').charAt(0).toUpperCase();
+        const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><rect width='100%' height='100%' fill='#212121'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-size='48' fill='#4CAF50' font-family='system-ui'>${initial}</text></svg>`;
+        return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    }
+
+    function editRoute(id) {
+        const routes = loadRoutes();
+        const rt = routes.find(r => r.id === id);
+        if (!rt) return;
+        const newName = prompt('Nuevo nombre de la ruta', rt.name);
+        if (newName === null) return;
+        rt.name = newName.trim() || rt.name;
+        saveRoutes(routes); init();
+    }
+
+    function deleteRoute(id) {
+        if (!confirm('Eliminar ruta y todos sus préstamos?')) return;
+        let routes = loadRoutes(); routes = routes.filter(r => r.id !== id); saveRoutes(routes);
+        let loans = loadLoans(); loans = loans.filter(l => l.routeId !== id); saveLoans(loans);
+        init();
+    }
+
+    function populateRouteSelect() {
+        const select = $('routeSelect');
+        select.innerHTML = '';
+        const allRoutes = loadRoutes();
+        
+        const allOption = document.createElement('option');
+        allOption.value = 'all';
+        allOption.textContent = 'Ver todas las rutas';
+        select.appendChild(allOption);
+        
+        if (allRoutes.length > 0) {
+            allRoutes.forEach(route => {
+                const option = document.createElement('option');
+                option.value = route.id;
+                option.textContent = route.name;
+                select.appendChild(option);
+            });
+            if (currentRouteId && allRoutes.some(r => r.id === currentRouteId)) {
+                select.value = currentRouteId;
+            } else {
+                 currentRouteId = 'all';
+            }
+        } else {
+             currentRouteId = 'all';
+        }
+        select.value = currentRouteId;
+        updateRouteInfo(currentRouteId);
+    }
+
+    $('routeSelect').addEventListener('change', (e) => {
+        currentRouteId = e.target.value;
+        updateRouteInfo(currentRouteId);
+    });
+    
+    // Nueva función para refrescar
+    function refreshDashboard() {
+        renderLoansList(currentRouteId);
+        updateTotals(currentRouteId);
+        renderTodayCollections();
+    }
+    window.refreshDashboard = refreshDashboard;
+
+    function updateRouteInfo(routeId) {
+        renderLoansList(routeId);
+        updateTotals(routeId);
+    }
+
+    $('btnAddLoan').addEventListener('click', () => {
+        const routeId = $('routeSelect').value;
+        const cliente = $('cliente').value.trim();
+        const cedula = $('cedula').value.trim();
+        const telefono = $('telefono').value.trim();
+        const direccion = $('direccion').value.trim();
+        const frecuencia = $('frecuencia').value;
+        const startDate = $('startDateInput').value;
+        const firstPaymentDateStr = $('firstPaymentDateInput').value;
+        const monto = Number($('monto').value.replace(/\D/g, ''));
+        const interes = Number($('interes').value);
+        const cuotasNum = parseInt($('cuotas').value);
+        if (!routeId || routeId === 'all') { alert('Selecciona una ruta válida para agregar un préstamo.'); return; }
+        if (!cliente || !monto || isNaN(monto) || !cuotasNum || isNaN(cuotasNum) || isNaN(interes) || !startDate || !firstPaymentDateStr) { alert('Completa todos los campos con valores válidos.'); return; }
+        const loans = loadLoans();
+        const newLoan = createLoanObject({
+            id: uid('L-'),
+            routeId,
+            cliente,
+            cedula,
+            telefono,
+            direccion,
+            frecuencia,
+            startDate,
+            firstPaymentDateStr,
+            monto,
+            interes,
+            cuotasNum,
+        });
+        loans.push(newLoan);
+        saveLoans(loans);
+        $('cliente').value = ''; $('cedula').value = ''; $('telefono').value = ''; $('direccion').value = ''; $('monto').value = ''; $('interes').value = ''; $('cuotas').value = '';
+        renderLoansList(routeId);
+        updateTotals(routeId);
+        alert('Préstamo creado');
+        renderTodayCollections();
+    });
+
+    function createLoanObject(data) {
+        const total = Number((data.monto + (data.monto * data.interes / 100)).toFixed(2));
+        const cuotaMonto = Number((total / data.cuotasNum).toFixed(2));
+        const cuotas = [];
+        const [year, month, day] = data.firstPaymentDateStr.split('-').map(Number);
+        let nextDate = new Date(year, month - 1, day);
+        for (let i = 1; i <= data.cuotasNum; i++) {
+            let currentDueDate = new Date(nextDate.getTime());
+            
+            if (i > 1) {
+                if (data.frecuencia === 'DIARIO') {
+                    currentDueDate.setDate(currentDueDate.getDate() + 1);
+                    while (currentDueDate.getDay() === 0) {
+                        currentDueDate.setDate(currentDueDate.getDate() + 1);
+                    }
+                } else if (data.frecuencia === 'SEMANAL') {
+                    currentDueDate.setDate(currentDueDate.getDate() + 7);
+                } else if (data.frecuencia === 'QUINCENAL') {
+                    currentDueDate.setDate(currentDueDate.getDate() + 15);
+                } else if (data.frecuencia === 'MENSUAL') {
+                    currentDueDate.setMonth(currentDueDate.getMonth() + 1);
+                }
+            }
+            nextDate = currentDueDate;
+            cuotas.push({
+                numero: i,
+                monto: cuotaMonto,
+                pagado: false,
+                fechaPago: null,
+                status: 'pending',
+                dueDate: currentDueDate.toISOString(),
+                abonos: [],
+                cargos: [],
+                late: false
+            });
+        }
+        return {
+            id: data.id,
+            routeId: data.routeId,
+            cliente: data.cliente,
+            cedula: data.cedula,
+            telefono: data.telefono,
+            direccion: data.direccion,
+            frecuencia: data.frecuencia,
+            startDate: new Date(data.startDate + 'T05:00:00Z').toISOString(),
+            firstPaymentDate: new Date(data.firstPaymentDateStr + 'T05:00:00Z').toISOString(),
+            monto: data.monto,
+            interes: data.interes,
+            totalConInteres: total,
+            cuotas,
+            status: 'active'
+        };
+    }
+
+    function deleteLoan(id) {
+        if (!confirm('Eliminar préstamo? Esto lo ocultará de la lista principal. Tenga en cuenta que no lo eliminará completamente.')) return;
+        let loans = loadLoans();
+        const loan = loans.find(l => l.id === id);
+        if (loan) {
+            loan.status = 'deleted';
+            saveLoans(loans);
+            renderLoansList(currentRouteId);
+            updateTotals(currentRouteId);
+            renderTodayCollections();
+        }
+    }
+
+    function renewLoan(loanId) {
+        const loans = loadLoans();
+        const oldLoan = loans.find(l => l.id === loanId);
+        if (!oldLoan) return alert('Préstamo no encontrado.');
+        let newMonto = prompt("Ingrese el nuevo monto del préstamo (ej: " + formatCOP(50000) + "):");
+        if (newMonto === null) return;
+        newMonto = Number(newMonto.replace(/\D/g, ''));
+        if (isNaN(newMonto) || newMonto <= 0) {
+            alert("Monto inválido. Por favor, ingresa un número positivo.");
+            return;
+        }
+        let newInteres = prompt("Ingrese el nuevo interés (%):", oldLoan.interes);
+        if (newInteres === null || isNaN(newInteres) || newInteres.trim() === '') {
+            return;
+        }
+        newInteres = Number(newInteres);
+        let newCuotas = prompt("Ingrese el nuevo número de cuotas:", oldLoan.cuotas.length);
+        if (newCuotas === null || isNaN(newCuotas) || newCuotas.trim() === '') {
+            return;
+        }
+        newCuotas = Number(newCuotas);
+        
+        oldLoan.status = 'renewed';
+        // Reiniciar el estado de 'late' para el préstamo anterior al renovar
+        oldLoan.cuotas.forEach(c => c.late = false);
+        const newLoan = createLoanObject({
+            id: uid('L-'),
+            routeId: oldLoan.routeId,
+            cliente: oldLoan.cliente,
+            cedula: oldLoan.cedula,
+            telefono: oldLoan.telefono,
+            direccion: oldLoan.direccion,
+            frecuencia: oldLoan.frecuencia,
+            startDate: new Date().toISOString().split('T')[0],
+            firstPaymentDateStr: new Date().toISOString().split('T')[0],
+            monto: newMonto,
+            interes: newInteres,
+            cuotasNum: newCuotas,
+        });
+        loans.push(newLoan);
+        saveLoans(loans);
+        alert('Préstamo renovado con éxito. El crédito anterior se ha saldado.');
+        renderLoansList(currentRouteId);
+        updateTotals(currentRouteId);
+        renderTodayCollections();
+    }
+
+    function openPlan(loanId) {
+        const loans = loadLoans(); const loan = loans.find(l => l.id === loanId);
+        if (!loan) return alert('Préstamo no encontrado');
+        showPlanModal(loan);
+    }
+
+    function showPlanModal(loan) {
+        const loans = loadLoans();
+        const currentLoan = loans.find(l => l.id === loan.id);
+        if (!currentLoan) return;
+
+        const routes = loadRoutes(); const route = routes.find(r => r.id === currentLoan.routeId);
+        
+        const saldo = (Array.isArray(currentLoan.cuotas) ? currentLoan.cuotas : []).reduce((s, c) => {
+            const abonosHechos = (c.abonos || []).reduce((sum, a) => sum + Number(a.monto || 0), 0);
+            const cargosTotales = (c.cargos || []).reduce((sum, cargo) => sum + Number(cargo.amount || 0), 0);
+            const cuotaMonto = Number(c.monto || 0);
+            return s + cuotaMonto + cargosTotales - abonosHechos;
+        }, 0);
+
+        $('planMeta').innerText = `${currentLoan.cliente} · Ruta: ${route ? route.name : '(ruta)'} · Total: $${formatCOP(currentLoan.totalConInteres)}`;
+
+        let planSummaryHtml = `<div style="display:flex;gap:12px;align-items:center;justify-content:space-between">
+            <div>
+                <div class="small muted-small">Monto inicial</div>
+                <div style="font-weight:700">$${formatCOP(currentLoan.monto)}</div>
+            </div>
+            <div>
+                <div class="small muted-small">Tasa</div>
+                <div style="font-weight:700">${currentLoan.interes}%</div>
+            </div>
+            <div>
+                <div class="small muted-small">Total con interés</div>
+                <div style="font-weight:700">$${formatCOP(currentLoan.totalConInteres)}</div>
+            </div>
+            <div>
+                <div class="small muted-small">Saldo restante</div>
+                <div style="font-weight:700">$${formatCOP(Math.max(0, saldo))}</div>
+            </div>
+        </div>`;
+        
+        const now = new Date();
+        const hasOverdueQuotas = currentLoan.cuotas.some(c => c.status !== 'paid' && new Date(c.dueDate) < now);
+
+        if (hasOverdueQuotas) {
+            planSummaryHtml += `<div style="text-align:center; margin-top: 15px;">
+                                    <button class="btn btn-danger btn-sm" onclick="applyLateFee('${currentLoan.id}')">
+                                        Aplicar recargo por atraso ($${formatCOP(LATE_FEE_AMOUNT)})
+                                    </button>
+                                </div>`;
+        }
+
+        $('planSummary').innerHTML = planSummaryHtml;
+        
+        let table = `<div style="max-height: 40vh; overflow-y: auto;">
+        <table class="table-cuotas">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Vence</th>
+                <th>Cuota</th>
+                <th>Otros Cargos</th>
+                <th>Abonos</th>
+                <th>Saldo</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>`;
+        (Array.isArray(currentLoan.cuotas) ? currentLoan.cuotas : []).forEach((c, idx) => {
+            let statusText = '';
+            const dueDate = new Date(c.dueDate);
+            const now = new Date();
+            const isOverdue = new Date(dueDate.setHours(0,0,0,0)) < new Date(now.setHours(0,0,0,0)) && c.status !== 'paid';
+            
+            if (c.status === 'paid') {
+                statusText = `<span class="success">Pagado</span>`;
+            } else if (isOverdue) {
+                statusText = `<span class="error">Vencido</span>`;
+            } else {
+                statusText = `<span class="muted-small">Pendiente</span>`;
+            }
+            
+            const dueFormatted = `${dueDate.getDate()}/${dueDate.getMonth() + 1}/${dueDate.getFullYear()}`;
+            
+            const totalAbonado = (c.abonos || []).reduce((sum, a) => sum + Number(a.monto || 0), 0);
+            const totalCargos = (c.cargos || []).reduce((sum, cargo) => sum + Number(cargo.amount || 0), 0);
+            const cuotaMonto = Number(c.monto || 0);
+            const saldoEnCuota = (cuotaMonto + totalCargos) - totalAbonado;
+            
+            let actionButtons = '';
+            if (c.status !== 'paid') {
+                actionButtons = `
+                    <button class="btn-cuota" style="background:var(--success)" onclick="updateQuotaStatus('${currentLoan.id}',${idx},'paid')">Pagado</button>
+                    <button class="btn-cuota" style="background:var(--primary)" onclick="addAbono('${currentLoan.id}',${idx})">Abonar</button>
+                    <button class="btn-cuota" style="background:var(--primary-light);" onclick="addChargeToQuota('${currentLoan.id}',${idx})">+ Cargo</button>
+                    <button class="btn-cuota btn-recibo" onclick="showQuotaReceipt('${currentLoan.id}',${idx})">Recibo</button>
+                `;
+            } else {
+                 actionButtons = `<button class="btn-cuota" style="background:var(--muted-text)" onclick="updateQuotaStatus('${currentLoan.id}',${idx},'pending')">Deshacer Pago</button>
+                 <button class="btn-cuota btn-recibo" onclick="showQuotaReceipt('${currentLoan.id}',${idx})">Recibo</button>`;
+            }
+            
+            table += `<tr>
+                <td>${c.numero}</td>
+                <td onclick="updateQuotaDueDate('${currentLoan.id}',${idx})">${dueFormatted}</td>
+                <td>$${formatCOP(cuotaMonto)}</td>
+                <td>$${formatCOP(totalCargos)}</td>
+                <td>$${formatCOP(totalAbonado)}</td>
+                <td>$${formatCOP(Math.max(0, saldoEnCuota))}</td>
+                <td>${statusText}</td>
+                <td>${actionButtons}</td>
+            </tr>`;
+        });
+        table += `</tbody></table></div>`;
+        $('planTableWrap').innerHTML = table;
+        $('modalPlan').style.display = 'flex';
+    }
+
+    function applyLateFee(loanId) {
+        const loans = loadLoans();
+        const loan = loans.find(l => l.id === loanId);
+        if (!loan) return;
+        
+        const pendingQuotas = loan.cuotas.filter(c => c.status !== 'paid');
+        if (pendingQuotas.length === 0) {
+            alert('No hay cuotas pendientes para aplicar el recargo.');
+            return;
+        }
+        
+        const feePerQuota = LATE_FEE_AMOUNT / pendingQuotas.length;
+        
+        pendingQuotas.forEach(c => {
+            const lateFeeCharge = {
+                type: 'Recargo por atraso',
+                amount: feePerQuota
+            };
+            if (!c.cargos) c.cargos = [];
+            c.cargos.push(lateFeeCharge);
+        });
+
+        saveLoans(loans);
+        alert(`Se aplicó un recargo de $${formatCOP(LATE_FEE_AMOUNT)} dividido entre las ${pendingQuotas.length} cuotas restantes.`);
+        showPlanModal(loan);
+    }
+
+    function addChargeToQuota(loanId, cuotaIndex) {
+        const loans = loadLoans();
+        const loan = loans.find(l => l.id === loanId);
+        if (!loan) return;
+        const cuota = loan.cuotas[cuotaIndex];
+        
+        let type = prompt('Ingresa el tipo de cargo (ej: dominical):');
+        if (!type || type.trim() === '') return;
+        
+        let amount = prompt('Ingresa el monto del cargo:');
+        if (!amount || isNaN(amount) || Number(amount) <= 0) {
+            alert('Monto inválido.');
+            return;
+        }
+        
+        if (!cuota.cargos) cuota.cargos = [];
+        cuota.cargos.push({ type: type.trim(), amount: Number(amount) });
+        
+        saveLoans(loans);
+        showPlanModal(loan);
+        alert(`Cargo de ${type} por $${formatCOP(amount)} añadido a la cuota #${cuota.numero}.`);
+    }
+
+    function updateQuotaStatus(loanId, cuotaIndex, newStatus) {
+        const loans = loadLoans();
+        const loan = loans.find(l => l.id === loanId);
+        if (!loan) return;
+        const cuota = loan.cuotas[cuotaIndex];
+        
+        if (newStatus === 'paid' && cuota.status !== 'paid' && !confirm('¿Estás seguro de que quieres marcar esta cuota como pagada?')) return;
+        if (newStatus === 'unpaid' && cuota.status === 'paid' && !confirm('¿Estás seguro de que quieres marcar esta cuota como no pagada?')) return;
+        if (newStatus === 'pending' && cuota.status === 'paid' && !confirm('¿Estás seguro de que quieres deshacer este pago?')) return;
+
+        const totalAbonadoEnCuota = (cuota.abonos || []).reduce((sum, a) => sum + Number(a.monto || 0), 0);
+        const totalCargos = (cuota.cargos || []).reduce((sum, c) => sum + Number(c.amount || 0), 0);
+        const cuotaMonto = Number(cuota.monto || 0);
+        const totalCuotaConRecargos = cuotaMonto + totalCargos;
+
+        let weeklyStats = loadWeeklyStats();
+        
+        if (newStatus === 'paid' && cuota.status !== 'paid') {
+            const montoAPagar = totalCuotaConRecargos - totalAbonadoEnCuota;
+            weeklyStats[loan.routeId] = (weeklyStats[loan.routeId] || 0) + montoAPagar;
+            if (!cuota.abonos) cuota.abonos = [];
+            cuota.abonos.push({monto: montoAPagar, fecha: new Date().toLocaleString()});
+        } else if (newStatus !== 'paid' && cuota.status === 'paid') {
+            const montoNetoPagado = (cuota.abonos || []).reduce((sum, a) => sum + Number(a.monto || 0), 0);
+            weeklyStats[loan.routeId] = Math.max(0, (weeklyStats[loan.routeId] || 0) - montoNetoPagado);
+            cuota.abonos = [];
+        }
+
+        cuota.status = newStatus;
+        cuota.pagado = (newStatus === 'paid');
+        if (newStatus === 'paid') {
+            cuota.fechaPago = new Date().toLocaleString();
+        } else {
+            cuota.fechaPago = null;
+        }
+
+        saveWeeklyStats(weeklyStats);
+        saveLoans(loans);
+        showPlanModal(loan);
+        renderLoansList(currentRouteId);
+        updateTotals(currentRouteId);
+        renderTodayCollections();
+    }
+
+    function addAbono(loanId, cuotaIndex) {
+        const abono = prompt('Ingrese el monto del abono:');
+        if (abono === null || isNaN(abono) || Number(abono) <= 0) return;
+        const loans = loadLoans();
+        const loan = loans.find(l => l.id === loanId);
+        if (!loan) return;
+        const abonoMonto = Number(abono);
+        let weeklyStats = loadWeeklyStats();
+        weeklyStats[loan.routeId] = (weeklyStats[loan.routeId] || 0) + abonoMonto;
+        saveWeeklyStats(weeklyStats);
+        const cuota = loan.cuotas[cuotaIndex];
+        if (!cuota.abonos) cuota.abonos = [];
+        cuota.abonos.push({ monto: abonoMonto, fecha: new Date().toLocaleString() });
+        const totalAbonadoEnCuota = cuota.abonos.reduce((sum, a) => sum + Number(a.monto), 0);
+        const totalCargos = (cuota.cargos || []).reduce((sum, c) => sum + Number(c.amount || 0), 0);
+        const cuotaMonto = Number(cuota.monto || 0);
+        const totalCuotaConRecargos = cuotaMonto + totalCargos;
+        if (totalAbonadoEnCuota >= totalCuotaConRecargos) {
+            cuota.status = 'paid';
+            cuota.pagado = true;
+            cuota.fechaPago = new Date().toLocaleString();
+            alert(`Cuota #${cuota.numero} marcada como pagada. Total abonado: $${formatCOP(totalAbonadoEnCuota)}`);
+        } else {
+            alert(`Abono de $${formatCOP(abonoMonto)} registrado. Saldo pendiente en la cuota: $${formatCOP(totalCuotaConRecargos - totalAbonadoEnCuota)}`);
+        }
+        saveLoans(loans);
+        showPlanModal(loan);
+        renderLoansList(currentRouteId);
+        updateTotals(currentRouteId);
+        renderTodayCollections();
+    }
+
+    function updateQuotaDueDate(loanId, cuotaIndex) {
+        const loans = loadLoans();
+        const loan = loans.find(l => l.id === loanId);
+        if (!loan) return;
+        const cuota = loan.cuotas[cuotaIndex];
+        const newDateStr = prompt('Ingrese la nueva fecha de vencimiento (YYYY-MM-DD):', new Date(cuota.dueDate).toISOString().split('T')[0]);
+        if (newDateStr === null) return;
+        const newDate = new Date(newDateStr + 'T05:00:00Z');
+        if (isNaN(newDate.getTime())) {
+            alert('Fecha inválida. Use el formato YYYY-MM-DD.');
+            return;
+        }
+        cuota.dueDate = newDate.toISOString();
+        saveLoans(loans);
+        showPlanModal(loan);
+        renderTodayCollections();
+    }
+    
+    function getOverdueDays(dueDate) {
+        const today = new Date();
+        const due = new Date(dueDate);
+        if (isNaN(due.getTime()) || today <= due) {
+            return 0;
+        }
+        let overdueDays = 0;
+        let currentDate = new Date(due);
+        currentDate.setHours(0, 0, 0, 0);
+        today.setHours(0, 0, 0, 0);
+
+        while (currentDate <= today) {
+            if (currentDate.getDay() !== 0) {
+                overdueDays++;
+            }
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+        return overdueDays - 1;
+    }
+
+    function showQuotaReceipt(loanId, cuotaIndex) {
+        const loans = loadLoans();
+        const routes = loadRoutes();
+        const loan = loans.find(l => l.id === loanId);
+        if (!loan) return;
+        const route = routes.find(r => r.id === loan.routeId);
+        const c = loan.cuotas[cuotaIndex];
+        
+        const overdueQuotas = loan.cuotas.filter(cuota => cuota.status === 'unpaid').length;
+        
+        let atrasoInfo = '';
+        if (overdueQuotas > 0) {
+            atrasoInfo = `<div>Atraso: <span class="atrasos-rojo">${overdueQuotas} cuota(s)</span></div>`;
+        }
+
+        const totalPagado = (Array.isArray(loan.cuotas) ? loan.cuotas : []).reduce((total, cuota) => {
+            const abonosTotales = cuota.abonos ? cuota.abonos.reduce((sum, a) => sum + Number(a.monto || 0), 0) : 0;
+            return total + abonosTotales;
+        }, 0);
+        
+        const totalDeuda = (Array.isArray(loan.cuotas) ? loan.cuotas : []).reduce((total, cuota) => {
+            const cargosTotales = (cuota.cargos || []).reduce((sum, cargo) => sum + Number(cargo.amount || 0), 0);
+            return total + Number(cuota.monto || 0) + cargosTotales;
+        }, 0);
+        
+        const saldoRestante = totalDeuda - totalPagado;
+        
+        const pagoActual = (c.abonos || []).reduce((sum, a) => sum + Number(a.monto || 0), 0);
+        const abonosAnteriores = (Array.isArray(loan.cuotas) ? loan.cuotas : []).slice(0, cuotaIndex).reduce((total, cuota) => {
+             return total + (cuota.abonos ? cuota.abonos.reduce((sum, a) => sum + Number(a.monto || 0), 0) : 0);
+        }, 0);
+        
+        const saldoAnterior = totalDeuda - (abonosAnteriores);
+        
+        const cargosActuales = (c.cargos || []).reduce((sum, cargo) => sum + Number(cargo.amount || 0), 0);
+        
+        const totalCuotaAPagar = Number(c.monto || 0) + cargosActuales;
+        const saldoEnCuota = totalCuotaAPagar - pagoActual;
+
+        const logo = (loan.logo || (route && route.logo) || placeholderLogo(route ? route.name : 'Ruta'));
+        let statusIcon = '';
+        let statusText = 'RECIBO DE ABONO';
+        if (c.status === 'paid') {
+            statusIcon = `<div style="width:20px;height:20px;background:var(--success);border-radius:50%;margin-right:8px"></div>`;
+            statusText = 'RECIBO DE PAGO COMPLETO';
+        } else if (c.status === 'unpaid') {
+            statusIcon = `<div style="width:20px;height:20px;background:var(--destructive);border-radius:50%;margin-right:8px"></div>`;
+            statusText = 'CUOTA NO PAGADA';
+        }
+        
+        let cargosHtml = '';
+        if (cargosActuales > 0) {
+            (c.cargos || []).forEach(cargo => {
+                cargosHtml += `<div style="display:flex;justify-content:space-between;">
+                    <div style="font-size:12px;">Cargo por ${cargo.type}</div>
+                    <div style="font-size:12px;">$${formatCOP(cargo.amount || 0)}</div>
+                </div>`;
+            });
+        }
+        
+        const html = `
+            <div class="recibo-preview" style="padding:10px; font-size:12px; line-height:1.2;">
+                <div class="recibo-header center" style="margin-bottom:10px;">
+                    <img src="${logo}" alt="logo" onerror="this.src='${placeholderLogo(route ? route.name : 'R')}'" style="width:80px;height:80px;">
+                    <div style="font-weight:bold;margin-top:5px;font-size:14px;">${route ? route.name : '(Ruta)'}</div>
+                </div>
+                <div style="padding:0;">
+                    <div class="recibo-title center" style="display:flex;justify-content:center;align-items:center;font-weight:bold;font-size:13px;">
+                        ${statusIcon}
+                        ${statusText}
+                    </div>
+                    <div style="margin-top:5px;">
+                        <div><strong>Cliente</strong><div class="muted-small">${loan.cliente}</div></div>
+                        ${loan.cedula ? `<div><strong>Cédula</strong><div class="muted-small">${loan.cedula}</div></div>` : ''}
+                        ${loan.telefono ? `<div><strong>Teléfono</strong><div class="muted-small">${loan.telefono}</div></div>` : ''}
+                        ${loan.direccion ? `<div><strong>Dirección</strong><div class="muted-small">${loan.direccion}</div></div>` : ''}
+                    </div>
+                    <div style="display:flex;justify-content:space-between;margin-top:5px;">
+                        <div><strong>Cuota #</strong><div class="muted-small">${c.numero}</div></div>
+                        <div><strong>Fecha</strong><div class="muted-small">${c.fechaPago || new Date().toLocaleString()}</div></div>
+                    </div>
+                    <hr style="margin: 5px 0; border: 0; border-top: 1px dashed var(--border-color);">
+                    
+                    <div style="display:flex;justify-content:space-between;">
+                         <div>Monto de la Cuota</div>
+                         <div>$${formatCOP(Number(c.monto))}</div>
+                    </div>
+                    ${cargosHtml}
+                    
+                    <div style="display:flex;justify-content:space-between; margin-top: 10px; font-weight: bold; font-size: 14px; border-top: 1px dashed var(--border-color); padding-top: 5px;">
+                         <div>Monto Total a Pagar</div>
+                         <div>$${formatCOP(totalCuotaAPagar)}</div>
+                    </div>
+                    
+                    <div style="display:flex;justify-content:space-between; margin-top: 10px; font-weight: bold; font-size: 14px; border-top: 1px dashed var(--border-color); padding-top: 5px;">
+                         <div>Monto Abonado</div>
+                         <div>$${formatCOP(pagoActual)}</div>
+                    </div>
+                    
+                    <div style="display:flex;justify-content:space-between; margin-top: 10px;">
+                        <div><strong>Saldo en esta cuota</strong></div>
+                        <div><div class="muted-small" id="reciboSaldo">$${formatCOP(Math.max(0, saldoEnCuota))}</div></div>
+                    </div>
+
+                    <div style="display:flex;justify-content:space-between; margin-top: 10px; font-weight: bold; font-size: 14px; border-top: 1px dashed var(--border-color); padding-top: 5px;">
+                         <div>Saldo Total</div>
+                         <div>$${formatCOP(Math.max(0, saldoRestante))}</div>
+                    </div>
+
+                    ${atrasoInfo}
+                    <div class="linea-firma" style="margin-top:10px;"><div>Firma autorizada</div></div>
+                    <div class="recibo-footer center muted-small" style="margin-top:5px; font-size:10px;">Gracias por su pago</div>
+                </div>
+                <div style="display:flex;gap:8px;justify-content:center;margin-top:12px">
+                    <button class="btn btn-sm" style="background:var(--primary); color:white; border-radius:8px" onclick="window.print()">Imprimir</button>
+                    <a class="btn btn-sm" id="btnReciboWA" style="background:#25d366;color:#fff;text-decoration:none; border-radius:8px" href="#" target="_blank">Enviar WhatsApp</a>
+                </div>
+            </div>
+        `;
+        $('reciboBody').innerHTML = html;
+        $('modalRecibo').style.display = 'flex';
+        const waLink = $('btnReciboWA');
+        waLink.href = waShareLink(loan, c, route, saldoRestante);
+        renderLoansList(currentRouteId);
+        updateTotals(currentRouteId);
+    }
+
+    function waShareLink(loan, cuota, route, saldoRestante) {
+        const rname = route ? route.name : 'Ruta';
+        const pagoActual = (cuota.abonos || []).reduce((sum, a) => sum + Number(a.monto || 0), 0);
+        const cargosActuales = (cuota.cargos || []).reduce((sum, cargo) => sum + Number(cargo.amount || 0), 0);
+        const totalCuotaAPagar = Number(cuota.monto || 0) + cargosActuales;
+        const saldoEnCuota = totalCuotaAPagar - pagoActual;
+
+        const overdueQuotas = loan.cuotas.filter(c => c.status === 'unpaid').length;
+        let atrasoText = '';
+        if (overdueQuotas > 0) {
+             atrasoText = `_Atraso_: ${overdueQuotas} cuota(s)%0A`;
+        }
+
+        let texto = `*Recibo de Pago*%0A_Ruta_: ${rname}%0A_Cliente_: ${loan.cliente}%0A_Cuota #_: ${cuota.numero}%0A%0A*Detalle*%0A_Total a Pagar en Cuota_: $${formatCOP(totalCuotaAPagar)}%0A_Monto Abonado_: $${formatCOP(pagoActual)}%0A_Saldo en Cuota_: $${formatCOP(Math.max(0, saldoEnCuota))}%0A%0A*Resumen*%0A${atrasoText}_Saldo Total Pendiente_: $${formatCOP(Math.max(0, saldoRestante))}`;
+        
+        return `https://wa.me/${loan.telefono}?text=${encodeURIComponent(texto)}`;
+    }
+
+    function sendWA(loanId, cuotaIndex) {
+        const loans = loadLoans();
+        const routes = loadRoutes();
+        const loan = loans.find(l => l.id === loanId);
+        const route = routes.find(r => r.id === loan.routeId);
+        const cuota = loan.cuotas[cuotaIndex];
+        const saldo = (Array.isArray(loan.cuotas) ? loan.cuotas : []).filter(x => x.status !== 'paid').reduce((s, x) => s + Number(x.monto || 0), 0);
+        const hasLatePayments = (Array.isArray(loan.cuotas) ? loan.cuotas : []).some(c => c.late);
+        const url = waShareLink(loan, cuota, route, saldo);
+        window.open(url, '_blank');
+    }
+
+    function closeModal(id) { $(id).style.display = 'none'; }
+    function closeModalByElem(elemId) { document.getElementById(elemId).style.display = 'none'; }
+
+    function showTab(tabId) {
+        const tabs = document.querySelectorAll('.tab-content');
+        tabs.forEach(tab => {
+            tab.classList.remove('active');
+        });
+        $(tabId).classList.add('active');
+        const buttons = document.querySelectorAll('.tab-btn');
+        buttons.forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.onclick.toString().includes(tabId)) {
+                btn.classList.add('active');
+            }
+        });
+    }
+    window.showTab = showTab;
+
+    function checkWeeklyReset() {
+        const stats = loadWeeklyStats();
+        const today = new Date();
+        const lastUpdateDate = stats.lastUpdate ? new Date(stats.lastUpdate) : null;
+        if (today.getDay() === 0 && (!lastUpdateDate || new Date(lastUpdateDate).getDay() !== 0)) {
+            const routes = loadRoutes();
+            routes.forEach(route => {
+                stats[route.id] = 0;
+            });
+            saveWeeklyStats(stats);
+            console.log("Recaudo semanal reiniciado.");
+        }
+        stats.lastUpdate = today.toISOString().split('T')[0];
+        saveWeeklyStats(stats);
+    }
+
+    function getWeeklyCollectedAmount(routeId) {
+        const stats = loadWeeklyStats();
+        if (routeId === 'all') {
+            return Object.values(stats).reduce((total, amount) => total + amount, 0);
+        }
+        return stats[routeId] || 0;
+    }
+    
+    function addExtraCollection() {
+        const amountStr = prompt('Ingrese la cantidad de dinero extra para agregar al recaudo:');
+        if (amountStr === null || amountStr.trim() === '') return;
+        const amount = Number(amountStr.replace(/\D/g, ''));
+        if (isNaN(amount) || amount <= 0) {
+            alert('Monto inválido. Por favor, ingresa un número positivo.');
+            return;
+        }
+
+        const routes = loadRoutes();
+        const routeNames = routes.map(r => r.name).join(', ');
+        const routeName = prompt(`Ingrese el nombre de la ruta para la que es este dinero. Opciones: ${routeNames}`);
+        if (!routeName) return;
+
+        const route = routes.find(r => r.name === routeName);
+        if (!route) {
+            alert('Ruta no encontrada. Por favor, revisa el nombre.');
+            return;
+        }
+
+        let weeklyStats = loadWeeklyStats();
+        weeklyStats[route.id] = (weeklyStats[route.id] || 0) + amount;
+        saveWeeklyStats(weeklyStats);
+        updateTotals(currentRouteId);
+        alert(`$${formatCOP(amount)} añadido al recaudo semanal de la ruta ${route.name}.`);
+    }
+
+    function resetWeeklyCollections() {
+        if (!confirm('¿Estás seguro de que quieres reiniciar el recaudo semanal de todas las rutas?')) return;
+        let weeklyStats = loadWeeklyStats();
+        const routes = loadRoutes();
+        routes.forEach(route => {
+            weeklyStats[route.id] = 0;
+        });
+        saveWeeklyStats(weeklyStats);
+        updateTotals(currentRouteId);
+        alert('Recaudo semanal de todas las rutas reiniciado.');
+    }
+
+    function updateTotals(routeId = null) {
+        const allLoans = loadLoans().filter(l => l.status === 'active');
+        
+        let loansToCalculate = [];
+        if (routeId === 'all' || !routeId) {
+            loansToCalculate = allLoans;
+        } else {
+            loansToCalculate = allLoans.filter(l => l.routeId === routeId);
+        }
+
+        let totalLoans = loansToCalculate.length;
+        let totalOnTheStreet = 0;
+        let totalGeneral = 0;
+        
+        const weeklyCollectedAmount = getWeeklyCollectedAmount(routeId);
+
+        loansToCalculate.forEach(loan => {
+            const totalPaid = (Array.isArray(loan.cuotas) ? loan.cuotas : []).reduce((sum, c) => {
+                return sum + (c.abonos || []).reduce((a, b) => a + Number(b.monto || 0), 0);
+            }, 0);
+            
+            const totalDebt = (Array.isArray(loan.cuotas) ? loan.cuotas : []).reduce((total, cuota) => {
+                const cargosTotales = (cuota.cargos || []).reduce((sum, cargo) => sum + Number(cargo.amount || 0), 0);
+                return total + Number(cuota.monto || 0) + cargosTotales;
+            }, 0);
+
+            totalOnTheStreet += totalDebt - totalPaid;
+            
+            totalGeneral += Number(loan.totalConInteres || 0);
+
+        });
+        
+        $('totalLoans').innerText = totalLoans;
+        $('totalGeneral').innerText = '$' + formatCOP(totalGeneral);
+        $('totalOnTheStreet').innerText = '$' + formatCOP(Math.max(0, totalOnTheStreet));
+        $('totalCollected').innerText = '$' + formatCOP(weeklyCollectedAmount);
+        
+        const routes = loadRoutes();
+        if (routeId && routeId !== 'all') {
+            const route = routes.find(r => r.id === routeId);
+            $('selRouteName').innerText = `Ruta: ${route ? route.name : 'Desconocida'}`;
+            $('selRouteSum').innerText = `Saldo en calle: $${formatCOP(totalOnTheStreet)}`;
+        } else {
+             $('selRouteName').innerText = 'Todas las rutas';
+            $('selRouteSum').innerText = `Saldo en calle total: $${formatCOP(totalOnTheStreet)}`;
+        }
+    }
+
+    function renderTodayCollections() {
+        const loans = loadLoans().filter(l => l.status === 'active');
+        const today = new Date();
+        const container = $('todayCollections');
+        container.innerHTML = '';
+        let dueTodayFound = false;
+        loans.forEach(loan => {
+            const nextQuota = loan.cuotas.find(c => c.status === 'pending' || c.status === 'unpaid');
+            if (nextQuota) {
+                const dueDate = new Date(nextQuota.dueDate);
+                const isDueToday = dueDate.getDate() === today.getDate() &&
+                    dueDate.getMonth() === today.getMonth() &&
+                    dueDate.getFullYear() === today.getFullYear();
+                if (isDueToday) {
+                    dueTodayFound = true;
+                    const div = document.createElement('div');
+                    div.className = "collection-item";
+                    div.innerHTML = `<span class="collection-item-name">${loan.cliente}</span>
+                                    <span class="collection-item-amount">$${formatCOP(nextQuota.monto)}</span>`;
+                    container.appendChild(div);
+                }
+            }
+        });
+        if (!dueTodayFound) {
+            container.innerHTML = '<span class="muted-small">No hay cobros pendientes para hoy.</span>';
+        }
+    }
+
+    function renderLoansList(routeId) {
+        const loans = loadLoans().filter(l => l.status === 'active' && (routeId === 'all' || l.routeId === routeId));
+        const routes = loadRoutes();
+        const list = $('loansList');
+        list.innerHTML = '';
+        if (loans.length === 0) {
+            const emptyState = document.createElement('div');
+            emptyState.style = "text-align:center; padding: 20px; color: var(--muted-text);";
+            emptyState.innerText = "No hay préstamos activos para mostrar.";
+            list.appendChild(emptyState);
+            return;
+        }
+        loans.forEach(loan => {
+            const route = routes.find(r => r.id === loan.routeId);
+            const routeName = route ? route.name : '(Ruta desconocida)';
+            const totalPagado = (Array.isArray(loan.cuotas) ? loan.cuotas : []).filter(c => c.status === 'paid').length;
+            const totalCuotas = (Array.isArray(loan.cuotas) ? loan.cuotas : []).length;
+            const saldoPendiente = (Array.isArray(loan.cuotas) ? loan.cuotas : []).reduce((total, cuota) => {
+                const abonosTotales = (cuota.abonos || []).reduce((a, b) => a + Number(b.monto || 0), 0);
+                const cargosTotales = (cuota.cargos || []).reduce((sum, cargo) => sum + Number(cargo.amount || 0), 0);
+                const cuotaRestante = (Number(cuota.monto || 0) + cargosTotales) - abonosTotales;
+                return total + cuotaRestante;
+            }, 0);
+            
+            const card = document.createElement('div');
+            card.className = "loan-card";
+            card.innerHTML = `
+                <div class="loan-header">
+                    <span class="loan-name">${loan.cliente}</span>
+                    <span class="loan-amount">$${formatCOP(saldoPendiente)}</span>
+                </div>
+                <div class="loan-details">
+                    <span>${routeName}</span>
+                    <span>Cuotas: ${totalPagado}/${totalCuotas}</span>
+                </div>
+                <div class="loan-actions">
+                    <button class="btn btn-primary btn-sm" onclick="openPlan('${loan.id}')">Ver Plan</button>
+                    <button class="btn btn-sm" style="background:var(--success)" onclick="renewLoan('${loan.id}')">Renovar</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteLoan('${loan.id}')">Eliminar</button>
+                </div>
+            `;
+            list.appendChild(card);
+        });
+    }
+
+    function arreglarDatosCorruptos() {
+        if (!confirm('Esta acción intentará corregir datos de préstamos incompletos o dañados. ¿Continuar?')) return;
+        
+        let loans = loadLoans();
+        let loansCorregidos = 0;
+        
+        loans = loans.map(loan => {
+            let loanCorrected = false;
+            
+            if (!Array.isArray(loan.cuotas) || loan.cuotas.length === 0) {
+                console.warn(`Préstamo ${loan.id} tiene cuotas incompletas. Creando nuevas cuotas.`);
+                
+                const total = Number((loan.monto + (loan.monto * loan.interes / 100)).toFixed(2));
+                const cuotaMonto = Number((total / loan.cuotasNum).toFixed(2));
+                
+                const newCuotas = [];
+                const [year, month, day] = new Date(loan.firstPaymentDate).toISOString().split('T')[0].split('-').map(Number);
+                let nextDate = new Date(year, month - 1, day);
+                for (let i = 1; i <= loan.cuotasNum; i++) {
+                     let currentDueDate = new Date(nextDate);
+                     if (i > 1) {
+                         if (loan.frecuencia === 'DIARIO') {
+                             currentDueDate.setDate(currentDueDate.getDate() + 1);
+                             while (currentDueDate.getDay() === 0) {
+                                 currentDueDate.setDate(currentDueDate.getDate() + 1);
+                             }
+                         } else if (loan.frecuencia === 'SEMANAL') {
+                             currentDueDate.setDate(currentDueDate.getDate() + 7);
+                         } else if (loan.frecuencia === 'QUINCENAL') {
+                             currentDueDate.setDate(currentDueDate.getDate() + 15);
+                         } else if (loan.frecuencia === 'MENSUAL') {
+                             currentDueDate.setMonth(currentDueDate.getMonth() + 1);
+                         }
+                     }
+                     nextDate = currentDueDate;
+                     newCuotas.push({
+                         numero: i,
+                         monto: cuotaMonto,
+                         pagado: false,
+                         fechaPago: null,
+                         status: 'pending',
+                         dueDate: currentDueDate.toISOString(),
+                         abonos: [],
+                         cargos: [],
+                         late: false
+                     });
+                }
+                loan.cuotas = newCuotas;
+                loanCorrected = true;
+            } else {
+                 loan.cuotas = loan.cuotas.map(cuota => {
+                     let cuotaCorrected = false;
+                     if (!cuota.status) {
+                         cuota.status = cuota.pagado ? 'paid' : 'pending';
+                         cuotaCorrected = true;
+                     }
+                     if (!cuota.dueDate) {
+                         console.warn(`Cuota #${cuota.numero} de préstamo ${loan.id} no tiene fecha de vencimiento.`);
+                         cuota.dueDate = new Date().toISOString();
+                         cuotaCorrected = true;
+                     }
+                     if (!Array.isArray(cuota.abonos)) {
+                         cuota.abonos = [];
+                         cuotaCorrected = true;
+                     }
+                     if (!Array.isArray(cuota.cargos)) {
+                         cuota.cargos = [];
+                         cuotaCorrected = true;
+                     }
+                     if (cuotaCorrected) {
+                          loanCorrected = true;
+                     }
+                     return cuota;
+                 });
+            }
+            
+            if (typeof loan.monto === 'string' && !isNaN(Number(loan.monto))) {
+                loan.monto = Number(loan.monto.replace(/\D/g, ''));
+                loanCorrected = true;
+            } else if (typeof loan.monto !== 'number' && typeof loan.monto !== 'string') {
+                 loan.monto = 0;
+                 loanCorrected = true;
+            }
+            if (typeof loan.interes === 'string' && !isNaN(Number(loan.interes))) {
+                loan.interes = Number(loan.interes);
+                loanCorrected = true;
+            } else if (typeof loan.interes !== 'number' && typeof loan.interes !== 'string') {
+                loan.interes = 0;
+                loanCorrected = true;
+            }
+            if (typeof loan.totalConInteres === 'string' && !isNaN(Number(loan.totalConInteres))) {
+                 loan.totalConInteres = Number(loan.totalConInteres.replace(/\D/g, ''));
+                 loanCorrected = true;
+            } else if (typeof loan.totalConInteres !== 'number' && typeof loan.totalConInteres !== 'string') {
+                 loan.totalConInteres = 0;
+                 loanCorrected = true;
+            }
+            
+            if (loanCorrected) {
+                loansCorregidos++;
+                console.log(`Préstamo ${loan.id} corregido.`);
+            }
+            return loan;
+        });
+        
+        saveLoans(loans);
+        
+        if (loansCorregidos > 0) {
+            alert(`Se han corregido ${loansCorregidos} préstamos. Por favor, refresca la página.`);
+            init();
+        } else {
+            alert('No se encontraron préstamos con datos corruptos.');
+        }
+    }
+
+    function showDebugInfo() {
+        console.log('--- Resumen de Importación ---');
+        try {
+            const routes = loadRoutes();
+            const loans = loadLoans();
+            console.log(`Rutas cargadas: ${routes.length}`);
+            console.log(routes);
+            console.log(`Préstamos cargados: ${loans.length}`);
+            console.log(loans);
+            console.log('--- Fin del Resumen ---');
+            alert('Importación completada. Revisa la consola (F12) para detalles.');
+        } catch (e) {
+            console.error('Error al cargar datos desde Local Storage:', e);
+        }
+    }
+
+    $('btnExport').addEventListener('click', () => {
+        const data = { routes: loadRoutes(), loans: loadLoans(), weeklyStats: loadWeeklyStats() };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `prestamos_export_${new Date().toISOString().slice(0, 10)}.json`; a.click();
+    });
+
+    $('btnImport').addEventListener('click', () => {
+        $('importFile').click();
+    });
+
+    $('importFile').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            try {
+                const importedData = JSON.parse(event.target.result);
+                let message = '';
+                let importedCount = 0;
+                localStorage.clear();
+                if (importedData.routes) {
+                    saveRoutes(importedData.routes);
+                    message += `Rutas (${importedData.routes.length})\n`;
+                    importedCount++;
+                }
+                if (importedData.loans) {
+                    const correctedLoans = importedData.loans.map(loan => {
+                        return { ...loan, status: loan.status || 'active' };
+                    });
+                    saveLoans(correctedLoans);
+                    message += `Préstamos (${correctedLoans.length})\n`;
+                    importedCount++;
+                }
+                if (importedData.weeklyStats) {
+                    saveWeeklyStats(importedData.weeklyStats);
+                    message += `Estadísticas semanales\n`;
+                    importedCount++;
+                }
+                if (importedCount > 0) {
+                    const routeSelect = $('routeSelect');
+                    if (routeSelect) {
+                        routeSelect.value = 'all';
+                        const changeEvent = new Event('change');
+                        routeSelect.dispatchEvent(changeEvent);
+                    }
+                    alert(`Datos importados con éxito.\n\n${message}\nEl programa se refrescará para mostrar los cambios.`);
+                    init();
+                    showDebugInfo();
+                } else {
+                    alert('El archivo no contiene datos válidos para importar.');
+                }
+            } catch (error) {
+                alert('Error al leer el archivo. Asegúrate de que es un archivo JSON válido.');
+                console.error(error);
+            }
+        };
+        reader.readAsText(file);
+    });
+
+    window.editRoute = editRoute;
+    window.deleteRoute = deleteRoute;
+    window.openPlan = openPlan;
+    window.deleteLoan = deleteLoan;
+    window.renewLoan = renewLoan;
+    window.updateQuotaStatus = updateQuotaStatus;
+    window.addAbono = addAbono;
+    window.addChargeToQuota = addChargeToQuota;
+    window.updateQuotaDueDate = updateQuotaDueDate;
+    window.showQuotaReceipt = showQuotaReceipt;
+    window.sendWA = sendWA;
+    window.closeModal = closeModal;
+    window.renderLoansList = renderLoansList;
+    window.addExtraCollection = addExtraCollection;
+    window.resetWeeklyCollections = resetWeeklyCollections;
+    window.showRouteDashboard = showRouteDashboard;
+    window.arreglarDatosCorruptos = arreglarDatosCorruptos;
+    window.applyLateFee = applyLateFee;
+</script>
+
+</body>
+</html>
